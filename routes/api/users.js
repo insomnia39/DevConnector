@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const config = require('config');
 const { check, validationResult } = require('express-validator');
 
 const User = require('../../models/User');
@@ -19,6 +21,12 @@ async function userExistValidation(email, res){
     }
 }
 
+async function hashPassword(password){
+    const salt = await bcrypt.genSalt(10);
+    const result = await bcrypt.hash(password, salt);
+    return result;
+}
+
 // @route   POST api/users
 // @desc    TEST route
 // @access  Public
@@ -28,14 +36,30 @@ router.post('/', arrValidator, async (req, res) => {
         if(!errors.isEmpty()){
             return res.status(400).json({ errors: errors.array() });
         }
-        const { name, email, password } = req.body;
+        let { name, email, password } = req.body;
         await userExistValidation(email, res);
         const avatar = gravatar.url(email, { s: '200', r: 'pg', d: 'mm'});
+        password = await hashPassword(password);
         const user = new User({name, email, avatar, password});
-        const salt = await bcrypt.genSalt(10);
-        user.password = await bcrypt.hash(password, salt);
         user.save();
-        res.send(`User registered. Id : ${user.id}`);
+        
+        const payload = {
+            user: {
+                id: user.id
+            }
+        }
+
+        jwt.sign(
+            payload, 
+            config.get('jwtSecret'),
+            {
+                expiresIn: config.get('jwtExpire')
+            },
+            (err, token) => {
+                if(err) throw err;
+                res.json({token})
+            }
+        );
     } catch (error) {
         res.status(500).send('Server Error');
     }
