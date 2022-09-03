@@ -1,6 +1,8 @@
 const Profile = require('../../models/Profile');
 const userController = require('../user/userController');
 const enums = require("../../utils/enums");
+const axios = require('axios').default;
+const config = require('config');
 
 async function getProfileByUserId(userId){
     const profile = await Profile.findOne({ user: userId}).populate('user', ['name', 'avatar']);
@@ -131,12 +133,28 @@ async function deleteFields(userId, fieldsId, source){
                 break;
         }
 
-        console.log(currentFields);
-
-        
         profile.save();
     }catch(err){
         console.log(err);
+        throw err;
+    }
+}
+
+async function getGithubRepos(username){
+    try{
+        const clientId = config.get('githubClientId');
+        const secret = config.get('githubSecret');
+        const uri = config.get('external-github-getRepos').replace("${username}", username).replace("${clientId}", clientId).replace("${secret}", secret);
+        try{
+            let result = (await axios.get(uri));
+            return result.data;
+        }catch(err){
+            if(err.response.status == 404){
+                throw "Github user not found";
+            }
+            throw err.response.statusText;
+        }
+    }catch(err){
         throw err;
     }
 }
@@ -179,5 +197,6 @@ module.exports = {
     getProfiles, 
     deleteProfile, 
     createFields, 
-    deleteFields 
+    deleteFields,
+    getGithubRepos
 };

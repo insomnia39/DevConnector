@@ -124,4 +124,16 @@ router.delete('/education/:education_id', [auth], async(req, res) => {
     }
 })
 
+// @route   GET api/profile/github/:username
+// @desc    Get user repos from github
+// @access  Public
+router.get('/github/:username', async (req, res) => {
+    try {
+        const githubRepos = await controller.getGithubRepos(req.params.username);
+        res.send(githubRepos);
+    } catch (error) {
+        res.status(500).json({error});
+    }
+})
+
 module.exports = router;
