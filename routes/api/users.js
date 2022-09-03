@@ -16,7 +16,7 @@ router.post('/', validator.registValidation, async (req, res) => {
             return res.status(400).json({ errors: errors.array() });
         }
         let { name, email, password } = req.body;
-        const result = await controller.regist(name, email , password);
+        const result = await controller.createUser(name, email , password);
         res.send(result);
     } catch (error) {
         res.status(400).send(error);
