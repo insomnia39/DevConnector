@@ -44,6 +44,11 @@ async function createProfile(profile, userId){
     }
 }
 
+async function getProfiles(){
+    const profiles = await Profile.find().populate('user', '[name, avatar]');
+    return profiles;
+}
+
 async function updateProfile(userId, profile){
     try {
         const updatedProfile = await Profile.findOneAndUpdate(
@@ -57,4 +62,4 @@ async function updateProfile(userId, profile){
     }
 }
 
-module.exports = { getProfileByUserId, createProfile };
+module.exports = { getProfileByUserId, createProfile, getProfiles };

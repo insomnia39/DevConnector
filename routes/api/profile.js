@@ -34,4 +34,28 @@ router.post('/', [auth, validator.createProfile], async (req, res) => {
     }
 })
 
+// @route   GET api/profile
+// @desc    Get all profiles
+// @access  Public
+router.get('/', async(req, res) => {
+    try {
+        const profiles = await controller.getProfiles();
+        res.json(profiles);
+    } catch (error) {
+        res.status(500).json({error});
+    }
+})
+
+// @route   GET api/profile/user/:user_id
+// @desc    Get profile by user ID
+// @access  Public
+router.get('/user/:user_id', async(req, res) => {
+    try {
+        const profile = await controller.getProfileByUserId(req.params.user_id);
+        res.json(profile);
+    } catch (error) {
+        res.status(500).json({error});
+    }
+})
+
 module.exports = router;
