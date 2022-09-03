@@ -4,6 +4,7 @@ const auth = require('../../middleware/auth');
 const controller = require('../../controller/profile/profileController');
 const { validationResult } = require('express-validator');
 const validator = require('../../utils/validator');
+const enums = require("../../utils/enums");
 
 // @route   GET api/profile/me
 // @desc    Get current profile
@@ -78,7 +79,7 @@ router.put('/experience', [auth, validator.createExperience], async(req, res) =>
     try {
         const errors = validationResult(req);
         if(!errors.isEmpty()) return res.status(400).json({errors: errors.array()});
-        await controller.createExperience(req.user.id, req.body);
+        await controller.createFields(req.user.id, req.body, enums.PROFILE_FIELDS.experience);
         res.send("Experience Added");
     } catch (error) {
         res.status(500).json({error});
@@ -90,8 +91,34 @@ router.put('/experience', [auth, validator.createExperience], async(req, res) =>
 // @access  Private
 router.delete('/experience/:experience_id', [auth], async(req, res) => {
     try {
-        await controller.deleteExperience(req.user.id, req.params.experience_id);
+        await controller.deleteFields(req.user.id, req.params.experience_id, enums.PROFILE_FIELDS.experience);
         res.send("Experience Remove");
+    } catch (error) {
+        res.status(500).json({error});
+    }
+})
+
+// @route   PUT api/profile/education
+// @desc    Add profile education
+// @access  Private
+router.put('/education', [auth, validator.createEducation], async(req, res) => {
+    try {
+        const errors = validationResult(req);
+        if(!errors.isEmpty()) return res.status(400).json({errors: errors.array()});
+        await controller.createFields(req.user.id, req.body, enums.PROFILE_FIELDS.education);
+        res.send("Education Added");
+    } catch (error) {
+        res.status(500).json({error});
+    }
+})
+
+// @route   DELETE api/profile/education/:education_id
+// @desc    Remove profile education
+// @access  Private
+router.delete('/education/:education_id', [auth], async(req, res) => {
+    try {
+        await controller.deleteFields(req.user.id, req.params.education_id, enums.PROFILE_FIELDS.education);
+        res.send("Education Remove");
     } catch (error) {
         res.status(500).json({error});
     }

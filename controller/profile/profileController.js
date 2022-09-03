@@ -1,5 +1,6 @@
 const Profile = require('../../models/Profile');
 const userController = require('../user/userController');
+const enums = require("../../utils/enums");
 
 async function getProfileByUserId(userId){
     const profile = await Profile.findOne({ user: userId}).populate('user', ['name', 'avatar']);
@@ -69,45 +70,107 @@ async function deleteProfile(userId){
     }
 }
 
-async function createExperience(userId, payload){
+async function createFields(userId, payload, source){
     try{
-        const { title, company, location, from, to, current, description } = payload;
         const profile = await getProfileByUserId(userId);
-
-        if(!profile.experience){
-            profile.experience = [];
-        }
         
-        const newExperience = {};
-        if(title) newExperience.title = title;
-        if(company) newExperience.company = company;
-        if(location) newExperience.location = location;
-        if(from) newExperience.from = from;
-        if(to) newExperience.to = to;
-        if(current) newExperience.current = current;
-        if(description) newExperience.description = description;
+        const newFields = createNewFields(payload, source);
 
-        profile.experience.unshift(newExperience);
+        switch(source){
+            case enums.PROFILE_FIELDS.experience: {
+                if(!profile.experience) profile.experience = [];
+                profile.experience.unshift(newFields);
+            };
+                break;
+            case enums.PROFILE_FIELDS.education: {
+                if(!profile.education) profile.education = [];
+                profile.education.unshift(newFields);
+            };
+                break;
+            default: 
+                throw "Unrecognized source call";
+        }
         profile.save();
     }catch(err){
         throw err;
     }
 }
 
-async function deleteExperience(userId, experienceId){
+async function deleteFields(userId, fieldsId, source){
     try{
-        const profile = await getProfileByUserId(userId);
-        const currentExperience = profile.experience ?? [];
-        if(currentExperience.length == 0) throw "Experiences is empty";
+        console.log("start");
 
-        let updatedExperience = currentExperience.filter(x => x.id != experienceId);
-        if(currentExperience.length == updatedExperience.length) throw "Experience id is not found";
+        const profile = await getProfileByUserId(userId);
+        let currentFields = [];
+        let message = "";
+        console.log("start");
+
+        switch(source){
+            case enums.PROFILE_FIELDS.experience: {
+                currentFields = profile.experience ?? profile.experience.length == 0 ? profile.experience : [];
+                message = "Experience";
+            }
+                break;
+            case enums.PROFILE_FIELDS.education: {
+                currentFields = profile.education ?? profile.education.length == 0 ? profile.education : [];
+                message = "Education";
+            }
+                break;
+            default: throw "Unrecognized source call";
+        }
+
+        if(currentFields.length == 0) throw `${message} is empty`;
+
+        let updatedFields = currentFields.filter(x => x.id != fieldsId);
+        if(currentFields.length == updatedFields.length) throw `${message} id is not found`;
         
-        profile.experience = updatedExperience;
+        switch(source){
+            case enums.PROFILE_FIELDS.experience: profile.experience = updatedFields;
+                break;
+            case enums.PROFILE_FIELDS.education: profile.education = updatedFields;
+                break;
+        }
+
+        console.log(currentFields);
+
+        
         profile.save();
     }catch(err){
+        console.log(err);
         throw err;
     }
+}
+
+function createNewFields(payload, source){
+    const newFields = {};
+
+    switch(source){
+        case enums.PROFILE_FIELDS.experience: {
+            const { title, company, location, from, to, current, description } = payload;
+            if(title) newFields.title = title;
+            if(company) newFields.company = company;
+            if(location) newFields.location = location;
+            if(from) newFields.from = from;
+            if(to) newFields.to = to;
+            if(current) newFields.current = current;
+            if(description) newFields.description = description;
+        }
+            break;
+        case enums.PROFILE_FIELDS.education: {
+            const { school, degree, fieldofstudy, from, to, current, description } = payload;
+            if(school) newFields.school = school;
+            if(degree) newFields.degree = degree;
+            if(fieldofstudy) newFields.fieldofstudy = fieldofstudy;
+            if(from) newFields.from = from;
+            if(to) newFields.to = to;
+            if(current) newFields.current = current;
+            if(description) newFields.description = description;
+        }
+            break;
+        default: throw "Unrecognized source call";
+    }
+    
+    return newFields;
 }
 
 module.exports = { 
@@ -115,6 +178,6 @@ module.exports = {
     createProfile, 
     getProfiles, 
     deleteProfile, 
-    createExperience, 
-    deleteExperience 
+    createFields, 
+    deleteFields 
 };
