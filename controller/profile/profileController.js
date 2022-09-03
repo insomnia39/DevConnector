@@ -1,7 +1,6 @@
-const req = require('express/lib/request');
-const res = require('express/lib/response');
 const Profile = require('../../models/Profile');
 const User = require('../../models/User');
+const userController = require('../user/userController');
 
 async function getProfileByUserId(userId){
     const profile = await Profile.findOne({ user: userId}).populate('user', ['name', 'avatar']);
@@ -62,4 +61,13 @@ async function updateProfile(userId, profile){
     }
 }
 
-module.exports = { getProfileByUserId, createProfile, getProfiles };
+async function deleteProfile(userId){
+    try{
+        await Profile.findOneAndRemove({ user: userId });
+        await userController.deleteUser(userId);
+    }catch(err){
+        throw err;
+    }
+}
+
+module.exports = { getProfileByUserId, createProfile, getProfiles, deleteProfile };

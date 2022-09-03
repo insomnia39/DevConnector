@@ -31,7 +31,7 @@ router.post('/', validator.loginValidation, async (req, res) => {
             return res.status(400).json({ errors: errors.array() });
         }
         const { email, password } = req.body;
-        const result = await controller.login(email, password);
+        const result = await controller.checkUser(email, password);
 
         res.send(result);
     } catch (error) {

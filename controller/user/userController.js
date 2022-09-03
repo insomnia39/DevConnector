@@ -4,7 +4,7 @@ const encryption = require('../../utils/encryption');
 const jwt = require('jsonwebtoken');
 const config = require('config');
 
-async function login(email, password){
+async function checkUser(email, password){
     const user = await User.findOne({ email });
     // Bad error message, just for dev
     if(!user) throw "Email is wrong";
@@ -21,8 +21,8 @@ async function login(email, password){
     return result;
 }
 
-async function regist(name, email, password){
-    const isUserExist = await CheckUserExist(email);
+async function createUser(name, email, password){
+    const isUserExist = await checkUserExist(email);
     if(isUserExist) throw "user is already exist";
 
     const avatar = gravatar.url(email, { s: '200', r: 'pg', d: 'mm'});
@@ -39,9 +39,17 @@ async function regist(name, email, password){
     return result;
 }
 
-async function CheckUserExist(email){
+async function checkUserExist(email){
     const user = await User.findOne({ email });
     return user ? true : false;
+}
+
+async function deleteUser(userId){
+    try{
+        await User.findOneAndRemove({ _id: userId });
+    }catch(err){
+        throw err;
+    }
 }
 
 function createJwt(payload){
@@ -55,4 +63,4 @@ function createJwt(payload){
     return token;
 }
 
-module.exports = { login, regist };
+module.exports = { checkUser, createUser, deleteUser };
