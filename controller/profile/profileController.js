@@ -1,6 +1,4 @@
-const { TokenExpiredError } = require('jsonwebtoken');
 const Profile = require('../../models/Profile');
-const User = require('../../models/User');
 const userController = require('../user/userController');
 
 async function getProfileByUserId(userId){
@@ -75,7 +73,7 @@ async function createExperience(userId, payload){
     try{
         const { title, company, location, from, to, current, description } = payload;
         const profile = await getProfileByUserId(userId);
-        
+
         if(!profile.experience){
             profile.experience = [];
         }
@@ -96,4 +94,27 @@ async function createExperience(userId, payload){
     }
 }
 
-module.exports = { getProfileByUserId, createProfile, getProfiles, deleteProfile, createExperience };
+async function deleteExperience(userId, experienceId){
+    try{
+        const profile = await getProfileByUserId(userId);
+        const currentExperience = profile.experience ?? [];
+        if(currentExperience.length == 0) throw "Experiences is empty";
+
+        let updatedExperience = currentExperience.filter(x => x.id != experienceId);
+        if(currentExperience.length == updatedExperience.length) throw "Experience id is not found";
+        
+        profile.experience = updatedExperience;
+        profile.save();
+    }catch(err){
+        throw err;
+    }
+}
+
+module.exports = { 
+    getProfileByUserId, 
+    createProfile, 
+    getProfiles, 
+    deleteProfile, 
+    createExperience, 
+    deleteExperience 
+};

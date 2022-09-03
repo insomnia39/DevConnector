@@ -85,4 +85,16 @@ router.put('/experience', [auth, validator.createExperience], async(req, res) =>
     }
 })
 
+// @route   DELETE api/profile/experience/:experience_id
+// @desc    Remove profile experience
+// @access  Private
+router.delete('/experience/:experience_id', [auth], async(req, res) => {
+    try {
+        await controller.deleteExperience(req.user.id, req.params.experience_id);
+        res.send("Experience Remove");
+    } catch (error) {
+        res.status(500).json({error});
+    }
+})
+
 module.exports = router;
