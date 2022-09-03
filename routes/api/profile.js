@@ -71,4 +71,18 @@ router.delete('/', [auth], async(req, res) => {
     }
 })
 
+// @route   PUT api/profile/experience
+// @desc    Add profile experience
+// @access  Private
+router.put('/experience', [auth, validator.createExperience], async(req, res) => {
+    try {
+        const errors = validationResult(req);
+        if(!errors.isEmpty()) return res.status(400).json({errors: errors.array()});
+        await controller.createExperience(req.user.id, req.body);
+        res.send("Experience Added");
+    } catch (error) {
+        res.status(500).json({error});
+    }
+})
+
 module.exports = router;

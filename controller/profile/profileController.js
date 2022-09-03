@@ -1,3 +1,4 @@
+const { TokenExpiredError } = require('jsonwebtoken');
 const Profile = require('../../models/Profile');
 const User = require('../../models/User');
 const userController = require('../user/userController');
@@ -48,11 +49,11 @@ async function getProfiles(){
     return profiles;
 }
 
-async function updateProfile(userId, profile){
+async function updateProfile(userId, payload){
     try {
         const updatedProfile = await Profile.findOneAndUpdate(
             { user: userId },
-            { $set: profile},
+            { $set: payload},
             { new : true }
         )
         return updatedProfile;
@@ -70,4 +71,29 @@ async function deleteProfile(userId){
     }
 }
 
-module.exports = { getProfileByUserId, createProfile, getProfiles, deleteProfile };
+async function createExperience(userId, payload){
+    try{
+        const { title, company, location, from, to, current, description } = payload;
+        const profile = await getProfileByUserId(userId);
+        
+        if(!profile.experience){
+            profile.experience = [];
+        }
+        
+        const newExperience = {};
+        if(title) newExperience.title = title;
+        if(company) newExperience.company = company;
+        if(location) newExperience.location = location;
+        if(from) newExperience.from = from;
+        if(to) newExperience.to = to;
+        if(current) newExperience.current = current;
+        if(description) newExperience.description = description;
+
+        profile.experience.unshift(newExperience);
+        profile.save();
+    }catch(err){
+        throw err;
+    }
+}
+
+module.exports = { getProfileByUserId, createProfile, getProfiles, deleteProfile, createExperience };
