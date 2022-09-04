@@ -19,4 +19,40 @@ router.post('/', [auth, validator.createPost], async (req, res) => {
     }
 });
 
+// @route   GET api/posts
+// @desc    Get all posts
+// @access  PRIVATE
+router.get('/', [auth], async (req, res) => {
+    try {
+        const post = await controller.getAllPost();
+        res.json(post);
+    } catch (error) {
+        res.status(500).json({error});
+    }
+});
+
+// @route   GET api/posts/:post_id
+// @desc    Get post by id
+// @access  PRIVATE
+router.get('/:post_id', [auth], async (req, res) => {
+    try {
+        const post = await controller.getPost(req.params.post_id);
+        res.json(post);
+    } catch (error) {
+        res.status(500).json({error});
+    }
+});
+
+// @route   DELTE api/posts/:post_id
+// @desc    Delete a post
+// @access  PRIVATE
+router.delete('/:post_id', [auth], async (req, res) => {
+    try {
+        await controller.deletePost(req.user.id, req.params.post_id);
+        res.send("Post deleted");
+    } catch (error) {
+        res.status(500).json({error});
+    }
+});
+
 module.exports = router;

@@ -64,7 +64,7 @@ async function getUserByEmail(email){
 
 async function getUserById(userId){
     try {
-        const user = await User.findOne({ _id: userId }).select('-password');
+        const user = await User.findById(userId).select('-password');
         if(user) return user;
         throw `User with id ${userId} doesn't exist`;
     } catch (err) {
