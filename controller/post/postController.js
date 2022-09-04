@@ -72,4 +72,36 @@ async function removeLike(userId, postId){
     }
 }
 
-module.exports = { createPost, getPost, getAllPost, deletePost, addLike, removeLike}
+async function addComment(userId, postId, text){
+    try {
+        const user = await userController.getUserById(userId);
+        const post = await getPost(postId);
+        const comment = {
+            user: userId,
+            text: text,
+            avatar: user.avatar
+        }
+        post.comments.unshift(comment);
+        post.save();
+    } catch (err) {
+        throw err;
+    }
+}
+
+async function removeComment(userId, postId, commentId){
+    try {
+        const post = await getPost(postId);
+        const comments = post.comments.map(s => s.id);
+        const comment = post.comments.find(s => s.id === commentId);
+        if(!comment) throw "Comment is not found";
+        const isCommentOwnedByUser = comment.user.toString() == userId;
+        if(!isCommentOwnedByUser) throw "Only the comment creator can delete";
+        const commentIndex = comments.indexOf(commentId);
+        post.comments.splice(commentIndex, 1);
+        post.save()
+    } catch (err) {
+        throw err;
+    }
+}
+
+module.exports = { createPost, getPost, getAllPost, deletePost, addLike, removeLike, addComment, removeComment}

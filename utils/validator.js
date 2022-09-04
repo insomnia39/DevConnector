@@ -46,6 +46,9 @@ const validator = {
     ],
     createPost: [
         text
+    ],
+    createComment: [
+        text
     ]
 };
 

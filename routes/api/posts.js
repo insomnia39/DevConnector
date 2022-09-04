@@ -79,4 +79,28 @@ router.put('/unlike/:post_id', [auth], async (req, res) => {
     }
 });
 
+// @route   POST api/posts/comment/:post_id
+// @desc    Create a post comment
+// @access  PRIVATE
+router.post('/comment/:post_id', [auth, validator.createComment], async (req, res) => {
+    try {
+        await controller.addComment(req.user.id, req.params.post_id, req.body.text);
+        res.send("Comment created");
+    } catch (error) {
+        res.status(500).json({error});
+    }
+});
+
+// @route   DELETE api/posts/comment/:post_id/:comment_id
+// @desc    Delete a post comment
+// @access  PRIVATE
+router.delete('/comment/:post_id/:comment_id', [auth, validator.createComment], async (req, res) => {
+    try {
+        await controller.removeComment(req.user.id, req.params.post_id, req.params.comment_id);
+        res.send("Comment deleted");
+    } catch (error) {
+        res.status(500).json({error});
+    }
+});
+
 module.exports = router;
