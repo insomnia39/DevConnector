@@ -6,6 +6,7 @@ const password = check('password', 'Please enter a password with 6 or more chara
 const status = check('status', 'Status is required').not().isEmpty();
 const skills = check('skills', 'Skills is required').not().isEmpty();
 const from = check('from', 'From is required').not().isEmpty();
+const text = check('text', 'Text is required').not().isEmpty();
 const experience = {
     title : check('title', 'Title is required').not().isEmpty(),
     company : check('company', 'Company is required').not().isEmpty(),
@@ -42,6 +43,9 @@ const validator = {
         education.degree,
         education.fieldofstudy,
         education.from
+    ],
+    createPost: [
+        text
     ]
 };
 

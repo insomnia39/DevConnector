@@ -52,6 +52,26 @@ async function deleteUser(userId){
     }
 }
 
+async function getUserByEmail(email){
+    try {
+        const user = await User.findOne({ email }).select('-password');
+        if(user) return user;
+        throw `User with emal ${email} doesn't exist`;
+    } catch (err) {
+        throw err
+    }
+}
+
+async function getUserById(userId){
+    try {
+        const user = await User.findOne({ _id: userId }).select('-password');
+        if(user) return user;
+        throw `User with id ${userId} doesn't exist`;
+    } catch (err) {
+        throw err
+    }
+}
+
 function createJwt(payload){
     const token = jwt.sign(
         payload, 
@@ -63,4 +83,4 @@ function createJwt(payload){
     return token;
 }
 
-module.exports = { checkUser, createUser, deleteUser };
+module.exports = { checkUser, createUser, deleteUser, getUserByEmail, getUserById };
