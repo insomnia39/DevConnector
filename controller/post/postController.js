@@ -30,7 +30,8 @@ async function getAllPost(){
 async function getPost(postId){
     try {
         const post = await Post.findById(postId);
-        return post;
+        if(post) return post;
+        throw `Post with id ${postId} is not found`;
     } catch (err) {
         throw `Post with id ${postId} is not found`;
     }
@@ -46,4 +47,29 @@ async function deletePost(userId, postId){
     }
 }
 
-module.exports = { createPost, getPost, getAllPost, deletePost }
+async function addLike(userId, postId){
+    try {
+        const post = await getPost(postId);
+        const postHasBeenLiked = post.likes.filter( s => s.user.toString() === userId).length > 0;
+        if(postHasBeenLiked) throw "This post already liked";
+        post.likes.unshift({ user: userId});
+        post.save();
+    } catch (err) {
+        throw err;
+    }
+}
+
+async function removeLike(userId, postId){
+    try {
+        const post = await getPost(postId);
+        const postHasBeenLiked = post.likes.filter( s => s.user.toString() === userId).length > 0;
+        if(!postHasBeenLiked) throw "This post has not yet been liked";
+        const likeIndex = post.likes.map(s => s.user.toString()).indexOf(userId);
+        post.likes.splice(likeIndex, 1);
+        post.save();
+    } catch (err) {
+        throw err;
+    }
+}
+
+module.exports = { createPost, getPost, getAllPost, deletePost, addLike, removeLike}

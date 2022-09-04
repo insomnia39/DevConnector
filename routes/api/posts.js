@@ -55,4 +55,28 @@ router.delete('/:post_id', [auth], async (req, res) => {
     }
 });
 
+// @route   PUT api/posts/like/:post_id
+// @desc    Like a post
+// @access  PRIVATE
+router.put('/like/:post_id', [auth], async (req, res) => {
+    try {
+        await controller.addLike(req.user.id, req.params.post_id);
+        res.send("Post liked");
+    } catch (error) {
+        res.status(500).json({error});
+    }
+});
+
+// @route   PUT api/posts/unlike/:post_id
+// @desc    Unlike a post
+// @access  PRIVATE
+router.put('/unlike/:post_id', [auth], async (req, res) => {
+    try {
+        await controller.removeLike(req.user.id, req.params.post_id);
+        res.send("Post unliked");
+    } catch (error) {
+        res.status(500).json({error});
+    }
+});
+
 module.exports = router;
